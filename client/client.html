@@ -1,13 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+
   <script>
 
+    /*Author: Andrew Black, w/ starter code from Austin Willoughby
+     *Purpose: internal js script handles utilizing the HTML functionality to allow the user to 
+     *send fetch requests to receive a status code (purely for API purposes)
+     */
+
+    //Handles the FETCH response
+    const handleResponse = async (response) => {
+      const content = document.querySelector('#content');
+
+      // switch case for various status codes
+      switch (response.status) {
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 401:
+          content.innerHTML = `<b>Unauthorized</b>`;
+          break;
+        case 403:
+          content.innerHTML = `<b>Forbidden</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Not Found</b>`;
+          break;
+        case 500:
+          content.innerHTML = `<b>Internal Server Error</b>`;
+          break;
+        case 501:
+          content.innerHTML = `<b>Not Implemented</b>`;
+          break;
+        // default code 404
+        default:
+          content.innerHTML = `<b>Not Found</b>`;
+          break;
+      }
+
+      // parse response based on user choice of XML or JSON
+      // regardless of choice, log the pre-parsed data of the response to the log
+      const contentType = response.headers.get('Content-Type');
+      if (contentType.includes('application/json')) {
+        const jsonResponse = await response.json();
+        console.log(jsonResponse);
+        content.innerHTML += `<p>${jsonResponse.message}</p>`;
+      } else if (contentType.includes('text/xml')) {
+        const xmlResponse = await response.text();
+        console.log(xmlResponse);
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlResponse, 'text/xml');
+        const message = xmlDoc.getElementsByTagName('message')[0].textContent;
+        content.innerHTML += `<p>${message}</p>`;
+      }
+    };
+
+    // sends a GET request with the selected parameters
+    const sendRequest = async () => {
+      const page = document.querySelector('#page').value;
+
+      // note that the value defaults to json. it should be impossible to get any other value besides xml or json,
+      // but for completion purposes I've added it here
+      const type = document.querySelector('#type').value || 'application/json';
+
+      // makes the fetch request with
+      const response = await fetch(page, {
+        method: 'GET',
+        headers: {
+          'Accept': type,
+        },
+      });
+
+      handleResponse(response);
+    };
+
+    // init function
+    // grabs the button and adds the click event listener, using sendRequest() to
+    // grab the correct status code
+    const init = () => {
+      const sendButton = document.querySelector('#send');
+
+      sendButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        sendRequest();
+        return false;
+      });
+    };
+
+    window.onload = init;
   </script>
 </head>
+
 <body>
   <section id="top">
     <h3>Status Code Tests</h3>
@@ -29,4 +119,5 @@
   <section id="content">
   </section>
 </body>
+
 </html>
