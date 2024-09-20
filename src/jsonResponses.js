@@ -5,6 +5,13 @@
  *NOTE: starter code not provided for this, but the basis of this was taken from
  *Austin Willoughby from an in-class lecture at Rochester Institute of Technology.
  *Source: https://github.com/IGM-RichMedia-at-RIT/head-request-example-done/blob/master/src/jsonResponses.js
+ *Exports: success,
+  badRequest,
+  notFound,
+  unauthorized,
+  forbidden,
+  notImplemented,
+  internal,
  */
 
 // function for handling XML responses
